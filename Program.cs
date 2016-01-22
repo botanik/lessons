@@ -1,6 +1,7 @@
 ﻿using System;
 using botanikClient.Visitors;
 using OpenHardwareMonitor.Hardware;
+using Topshelf;
 
 namespace botanikClient
 {
@@ -8,34 +9,20 @@ namespace botanikClient
     {
         private static void Main(string[] args)
         {
-            var visitor = new DataVisitor();
-            var updater = new UpdateVisitor();
-
-            var comp = new Computer
+            HostFactory.Run(x =>                                             
             {
-                CPUEnabled = true,
-                GPUEnabled = true,
-                MainboardEnabled = true,
-                HDDEnabled = true,
-                FanControllerEnabled = true,
-                RAMEnabled = true
-            };
+                x.Service<TemperatureMonitor>(s =>                            
+                {
+                    s.ConstructUsing(name => new TemperatureMonitor());     
+                    s.WhenStarted(tc => tc.Start());              
+                    s.WhenStopped(tc => tc.Stop());               
+                });
+                x.RunAsLocalSystem();                           
 
-            comp.Open();
-
-            ConsoleKeyInfo key;
-            do
-            {
-                Console.Clear();
-
-                comp.Accept(updater);
-                comp.Traverse(visitor);
-
-                Console.WriteLine("Done! Press any key to repeat, <enter> to stop...");
-                key = Console.ReadKey();
-            } while (key.Key != ConsoleKey.Enter);
-
-            comp.Close();
+                x.SetDescription("Monitoring the temp of CPU and another temp sensor's on our PC");       
+                x.SetDisplayName("TemperatureMonitor");                       
+                x.SetServiceName("TempMon");                      
+            });
         }
     }
 }
