@@ -8,11 +8,12 @@ namespace botanikClient
 {
     public class TemperatureMonitor
     {
-        public Computer Computer;
+        public Computer Computer { get; private set; }
 
-        private IVisitor DataVisitor = new DataVisitor();
-        private IVisitor UpdateVisitor = new UpdateVisitor();
-        private Timer Timer;
+        private readonly IVisitor _dataVisitor = new DataVisitor();
+        private readonly IVisitor _updateVisitor = new UpdateVisitor();
+
+        private Timer _timer;
 
         public void Start()
         {
@@ -27,23 +28,23 @@ namespace botanikClient
             };
             Computer.Open();
 
-            Timer = new Timer(60000);
-            Timer.Elapsed += Update;
+            _timer = new Timer(60000);
+            _timer.Elapsed += Update;
 
             Update(null, null);
-            Timer.Start();            
+            _timer.Start();            
         }
 
         public void Stop()
         {
-            Timer.Stop();
+            _timer.Stop();
             Computer.Close();            
         }
 
-        private void Update(Object source, ElapsedEventArgs e)
+        private void Update(object source, ElapsedEventArgs e)
         {
-            Computer.Accept(UpdateVisitor);
-            Computer.Traverse(DataVisitor);
+            Computer.Accept(_updateVisitor);
+            Computer.Traverse(_dataVisitor);
         }
     }
 }
