@@ -26,17 +26,18 @@ namespace botanikClient
                 RAMEnabled = true
             };
             Computer.Open();
+
             Timer = new Timer(60000);
             Timer.Elapsed += Update;
-            Timer.Start();
-            
+
+            Update(null, null);
+            Timer.Start();            
         }
 
         public void Stop()
         {
             Timer.Stop();
-            Computer.Close();
-            
+            Computer.Close();            
         }
 
         private void Update(Object source, ElapsedEventArgs e)
